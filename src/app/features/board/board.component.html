@@ -1,0 +1,87 @@
+<div class="board-container" *ngIf="project() as proj">
+  <header class="board-header">
+    <div class="header-left">
+      <a routerLink="/" class="btn-text">← Back to Projects</a>
+      <h1>{{ proj.name }}</h1>
+    </div>
+    <div class="header-right">
+      <div class="add-column">
+        <input type="text" [(ngModel)]="newColumnName" placeholder="New Column Name" (keyup.enter)="addColumn()">
+        <button (click)="addColumn()" [disabled]="!newColumnName.trim()">Add Column</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="board-main" cdkDropListGroup>
+    <div class="column" *ngFor="let column of proj.columns">
+      <div class="column-header">
+        <h2>{{ column.name }} ({{ column.tasks.length }})</h2>
+        <button *ngIf="!column.isDefault" class="btn-text" (click)="confirmDeleteColumn(column.id)">Delete</button>
+      </div>
+
+      <!-- Migration/Delete UI -->
+      <div class="migration-overlay" *ngIf="deletingColumnId === column.id">
+        <p *ngIf="column.tasks.length > 0">Move tasks to:</p>
+        <p *ngIf="column.tasks.length === 0">Delete column?</p>
+        
+        <select [(ngModel)]="targetMigrationColumnId" *ngIf="column.tasks.length > 0">
+          <option *ngFor="let target of getOtherColumns(column.id)" [value]="target.id">
+            {{ target.name }}
+          </option>
+        </select>
+        
+        <div class="migration-actions">
+          <button class="btn-small save" (click)="executeDeleteColumn()">Confirm</button>
+          <button class="btn-small edit" (click)="cancelDeleteColumn()">Cancel</button>
+        </div>
+      </div>
+
+      <div 
+        class="task-list"
+        cdkDropList
+        [id]="column.id"
+        [cdkDropListData]="column.tasks"
+        (cdkDropListDropped)="drop($event, column.id)"
+        *ngIf="deletingColumnId !== column.id"
+      >
+        <div class="task-card" *ngFor="let task of column.tasks" cdkDrag [cdkDragData]="task">
+          <div class="task-content" *ngIf="confirmDeleteTaskId !== task.id; else confirmTaskDelete">
+            <span class="task-title">{{ task.title }}</span>
+            <div class="task-actions">
+              <button class="btn-text" (click)="toggleStats(task.id)">View Logs</button>
+              <button class="btn-text danger" (click)="requestDeleteTask(task.id)">Delete</button>
+            </div>
+          </div>
+
+          <ng-template #confirmTaskDelete>
+            <div class="task-delete-confirm">
+              <p>Delete task?</p>
+              <div class="task-actions">
+                <button class="btn-text danger" (click)="confirmDeleteTask(column.id, task.id)">Yes</button>
+                <button class="btn-text" (click)="cancelDeleteTask()">No</button>
+              </div>
+            </div>
+          </ng-template>
+          
+          <div class="task-stats" *ngIf="showStatsTaskId === task.id">
+            <h4>Time Logs</h4>
+            <div class="stats-grid">
+              <div class="stat-item" *ngFor="let entry of getTimeLogEntries(task)">
+                <span class="stat-label">{{ entry.key }}:</span>
+                <span class="stat-value">{{ timerService.formatTime(entry.value) }}</span>
+              </div>
+              <div *ngIf="getTimeLogEntries(task).length === 0" class="no-stats">
+                No logs yet. Move this task to track time.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="add-task" *ngIf="column.name === 'Todo' && deletingColumnId !== column.id">
+        <input type="text" [(ngModel)]="newTaskTitle" placeholder="New Task Title" (keyup.enter)="addTask(column.id)">
+        <button (click)="addTask(column.id)" [disabled]="!newTaskTitle.trim()">Add Task</button>
+      </div>
+    </div>
+  </main>
+</div>
