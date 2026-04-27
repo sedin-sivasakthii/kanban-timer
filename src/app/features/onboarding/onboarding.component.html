@@ -1,0 +1,16 @@
+<div class="onboarding-container">
+  <div class="onboarding-card">
+    <h1>Welcome to KanbanTimer</h1>
+    <p>Let's get started with your name.</p>
+    
+    <div class="form-group">
+      <input 
+        type="text" 
+        [(ngModel)]="name" 
+        placeholder="Enter your name"
+        (keyup.enter)="getStarted()"
+      >
+      <button (click)="getStarted()" [disabled]="!name.trim()">Get Started</button>
+    </div>
+  </div>
+</div>
