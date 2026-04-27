@@ -1,1 +1,56 @@
-<!-- Assigned to Siva Sakthii -->
+
+<div class="home-container">
+<header>
+<div class="user-info">
+<h1>Hello, {{ userName }}!</h1>
+</div>
+</header>
+<main>
+<section class="create-project">
+<h2>Create New Project</h2>
+<div class="form-group">
+<input type="text" [(ngModel)]="newProjectName" placeholder="Project Name" (keyup.enter)="createProject()">
+<button (click)="createProject()" [disabled]="!newProjectName.trim()">Create</button>
+</div>
+</section>
+<section class="project-list">
+<h2>Your Projects</h2>
+<div class="projects-grid" *ngIf="projects().length > 0; else noProjects">
+<div *ngFor="let project of projects()" class="project-card"
+          (click)="editingProjectId !== project.id && confirmDeleteProjectId !== project.id && router.navigate(['/project', project.id])">
+<div class="project-card-header" *ngIf="editingProjectId !== project.id && confirmDeleteProjectId !== project.id; else editOrConfirm">
+<h3>{{ project.name }}</h3>
+<div class="card-actions">
+<button class="btn-text" (click)="startEdit($event, project)">Edit</button>
+<button class="btn-text danger" (click)="requestDelete($event, project.id)">Delete</button>
+</div>
+</div>
+<ng-template #editOrConfirm>
+<div class="delete-confirm" *ngIf="confirmDeleteProjectId === project.id" (click)="$event.stopPropagation()">
+<p>Delete project?</p>
+<div class="edit-actions">
+<button class="save" (click)="confirmDelete($event, project.id)">Yes</button>
+<button class="edit" (click)="cancelDelete($event)">No</button>
+</div>
+</div>
+<div class="edit-project-name" *ngIf="editingProjectId === project.id" (click)="$event.stopPropagation()">
+<input type="text" [(ngModel)]="editedProjectName" (keyup.enter)="saveEdit($event)"
+                (keyup.escape)="cancelEdit()" autofocus>
+<div class="edit-actions">
+<button class="save" (click)="saveEdit($event)">Save</button>
+<button class="edit" (click)="cancelEdit()">Cancel</button>
+</div>
+</div>
+</ng-template>
+<div class="stats" *ngIf="editingProjectId !== project.id">
+<span>{{ project.columns.length }} Columns</span>
+</div>
+</div>
+</div>
+<ng-template #noProjects>
+<p class="empty-state">No projects yet. Create one to get started!</p>
+</ng-template>
+</section>
+</main>
+</div>
+
