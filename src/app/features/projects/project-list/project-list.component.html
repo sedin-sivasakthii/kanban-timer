@@ -1,0 +1,10 @@
+<h2>Projects</h2>
+
+<div *ngFor="let p of projects" (click)="open(p.id)" class="card">
+  <h3>{{p.name}}</h3>
+  <p>{{countTasks(p)}} Tasks</p>
+  <p>{{p.columns.length}} Columns</p>
+</div>
+
+<input [(ngModel)]="name"/>
+<button (click)="create()">Create</button>
